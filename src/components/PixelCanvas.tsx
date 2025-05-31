@@ -198,7 +198,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-gray-100">
       <canvas
         ref={canvasRef}
-        className="cursor-crosshair"
+        className="cursor-crosshair bg-white"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
