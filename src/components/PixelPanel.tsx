@@ -47,6 +47,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
   };
 
   const isOwned = pixels.some(pixel => pixel.owner !== 'Available');
+  const isMultipleOwners = new Set(pixels.map(pixel => pixel.owner)).size > 1;
 
   return (
     <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ${
@@ -87,7 +88,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <span className="text-sm font-medium text-gray-800">Owner</span>
           </div>
           <p className={`text-sm ${isOwned ? 'text-blue-600' : 'text-green-600'}`}>
-            {pixels[0].owner}
+            {isMultipleOwners ? 'Multiple owners' : pixels[0].owner}
           </p>
         </div>
 
