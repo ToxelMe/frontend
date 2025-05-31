@@ -186,6 +186,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
 
           <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
+
             {COLORS.map((color) => (
               <button
                 key={color}
