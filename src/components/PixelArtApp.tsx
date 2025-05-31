@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { PixelCanvas } from './PixelCanvas';
 import { PixelPanel } from './PixelPanel';
 import { toast } from 'sonner';
+import { buyPixel } from '@/services/pixelService';
+import { generateMockPixels } from '../mocks/pixelMocks'; // добавлен импорт
 
-interface Pixel {
+export interface Pixel {
   x: number;
   y: number;
   color: string;
@@ -16,40 +18,11 @@ export const PixelArtApp: React.FC = () => {
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  const GRID_SIZE = 100;
+  const GRID_SIZE = 300;
 
   // Initialize pixels grid
   useEffect(() => {
-    const initialPixels: Pixel[][] = [];
-    
-    for (let x = 0; x < GRID_SIZE; x++) {
-      initialPixels[x] = [];
-      for (let y = 0; y < GRID_SIZE; y++) {
-        initialPixels[x][y] = {
-          x,
-          y,
-          color: '#f3f4f6', // Light gray default
-          owner: 'Available',
-          price: Math.floor(Math.random() * 50) + 10 // Random price 10-59
-        };
-      }
-    }
-
-    // Add some random colored pixels for demo
-    for (let i = 0; i < 200; i++) {
-      const x = Math.floor(Math.random() * GRID_SIZE);
-      const y = Math.floor(Math.random() * GRID_SIZE);
-      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
-      const owners = ['User1', 'User2', 'User3', 'PixelArtist', 'CryptoFan'];
-      
-      initialPixels[x][y] = {
-        ...initialPixels[x][y],
-        color: colors[Math.floor(Math.random() * colors.length)],
-        owner: owners[Math.floor(Math.random() * owners.length)]
-      };
-    }
-
-    setPixels(initialPixels);
+    setPixels(generateMockPixels(GRID_SIZE));
   }, []);
 
   const handlePixelClick = (pixel: Pixel) => {
@@ -58,32 +31,24 @@ export const PixelArtApp: React.FC = () => {
     setIsPanelOpen(true);
   };
 
-  const handleBuyPixel = (pixel: Pixel, newColor: string) => {
-    console.log('Buying pixel:', pixel, 'New color:', newColor);
-    
-    // Update pixel in grid
-    setPixels(prev => {
-      const newPixels = [...prev];
-      newPixels[pixel.x][pixel.y] = {
-        ...pixel,
-        color: newColor,
-        owner: 'You',
-        price: pixel.price + 5 // Increase price after purchase
-      };
-      return newPixels;
-    });
-
-    // Update selected pixel
-    setSelectedPixel(prev => prev ? {
-      ...prev,
-      color: newColor,
-      owner: 'You',
-      price: prev.price + 5
-    } : null);
-
-    toast.success(`Pixel (${pixel.x}, ${pixel.y}) purchased successfully!`, {
-      description: `New color: ${newColor}. Spent: ${pixel.price} FLOW`
-    });
+  const handleBuyPixel = async (pixel: Pixel, newColor: string) => {
+    // Use the service for buying logic
+    try {
+      const updatedPixel = await buyPixel(pixel, newColor, "You");
+      setPixels(prev => {
+        const newPixels = [...prev];
+        newPixels[pixel.x][pixel.y] = updatedPixel;
+        return newPixels;
+      });
+      setSelectedPixel(updatedPixel);
+      toast.success(`Pixel (${pixel.x}, ${pixel.y}) purchased successfully!`, {
+        description: `New color: ${newColor}. Spent: ${pixel.price} FLOW`,
+        duration: 1500,
+        position: 'bottom-left'
+      });
+    } catch (err) {
+      toast.error("Failed to buy pixel");
+    }
   };
 
   const handleClosePanel = () => {

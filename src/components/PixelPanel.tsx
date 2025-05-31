@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { X, Palette, User, DollarSign, ShoppingCart } from 'lucide-react';
-
-interface Pixel {
-  x: number;
-  y: number;
-  color: string;
-  owner: string;
-  price: number;
-}
+import { Pixel } from './PixelArtApp';
 
 interface PixelPanelProps {
   pixel: Pixel | null;

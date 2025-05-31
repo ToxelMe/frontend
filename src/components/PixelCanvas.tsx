@@ -24,7 +24,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
-  const GRID_SIZE = 100;
+  const GRID_SIZE = 300;
   const PIXEL_SIZE = 8;
 
   const drawCanvas = useCallback(() => {
@@ -68,6 +68,16 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
         }
       }
     }
+
+    // Draw black border around the whole field
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2 / scale;
+    ctx.strokeRect(
+      0,
+      0,
+      GRID_SIZE * PIXEL_SIZE,
+      GRID_SIZE * PIXEL_SIZE
+    );
 
     ctx.restore();
   }, [pixels, selectedPixel, scale, offset]);
