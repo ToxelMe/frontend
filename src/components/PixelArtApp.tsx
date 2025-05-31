@@ -103,7 +103,7 @@ export const PixelArtApp: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-800">Toxel</h1>
               <p className="text-sm text-gray-600">Draw. Battle. Earn.</p>
             </div>
-            <div className="text-right">
+            <div className="text-right flex items-center gap-4">
               {!wallet.isConnected ? (
                 <button
                   onClick={wallet.connect}
@@ -112,15 +112,33 @@ export const PixelArtApp: React.FC = () => {
                   Connect wallet
                 </button>
               ) : (
-                <div className="flex flex-col items-end space-y-1">
-                  <button
-                    onClick={wallet.disconnect}
-                    className="text-sm text-gray-600 hover:text-red-600 transition"
-                    title="Click to disconnect"
-                  >
-                    Connected: {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
-                  </button>
-                </div>
+                <>
+                  {/* Network status indicator */}
+                  {wallet.networkCorrect ? (
+                    <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm font-medium">
+                      <img src="/flow-logo.svg" alt="Flow" className="w-4 h-4" />
+                      Flow
+                    </div>
+                  ) : (
+                    <button
+                      onClick={wallet.switchNetwork}
+                      className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-sm font-medium hover:bg-red-200 transition"
+                    >
+                      Switch to Flow
+                    </button>
+                  )}
+
+                  {/* Address + disconnect */}
+                  <div className="flex flex-col items-end space-y-1">
+                    <button
+                      onClick={wallet.disconnect}
+                      className="text-sm text-gray-600 hover:text-red-600 transition"
+                      title="Click to disconnect"
+                    >
+                      Connected: {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </div>

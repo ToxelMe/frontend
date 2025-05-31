@@ -127,7 +127,6 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
         </div>
 
-        {/* Buy or Connect */}
         {!wallet.isConnected ? (
           <button
             onClick={wallet.connect}
@@ -136,13 +135,25 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             Connect wallet
           </button>
         ) : (
-          <button
-            onClick={handleBuy}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
-          >
-            <ShoppingCart size={18} />
-            Buy for {totalPrice} FLOW
-          </button>
+          <>
+            {/* Network status indicator */}
+            {!wallet.networkCorrect ? (
+              <button
+                onClick={wallet.switchNetwork}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                Switch to Flow
+              </button>
+            ) : (
+              <button
+                onClick={handleBuy}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <ShoppingCart size={18} />
+                Buy for {totalPrice} FLOW
+              </button>
+            )}
+          </>
         )}
 
         <p className="text-xs text-gray-500 mt-3 text-center">

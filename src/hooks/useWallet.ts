@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ethers } from "ethers";
 
 const WALLET_CONNECTED_KEY = "wallet-connected";
+
+const TARGET_CHAIN_ID = "0x221"; // например, 0x1 для Ethereum Mainnet
+const TARGET_CHAIN_NAME = "FLOW"; // название для UI
 
 export const useWallet = () => {
   const [address, setAddress] = useState<string | null>(null);
   const [isManuallyConnected, setIsManuallyConnected] = useState(false);
+  const [chainId, setChainId] = useState<string | null>(null);
 
   const connect = async () => {
     if (!window.ethereum) {
@@ -20,8 +23,11 @@ export const useWallet = () => {
 
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+
       if (accounts.length > 0) {
         setAddress(accounts[0]);
+        setChainId(currentChainId);
         setIsManuallyConnected(true);
         localStorage.setItem(WALLET_CONNECTED_KEY, "true");
 
@@ -44,6 +50,7 @@ export const useWallet = () => {
   const disconnect = () => {
     setAddress(null);
     setIsManuallyConnected(false);
+    setChainId(null);
     localStorage.removeItem(WALLET_CONNECTED_KEY);
     toast("Wallet disconnected", {
       description: "You have disconnected MetaMask.",
@@ -52,7 +59,35 @@ export const useWallet = () => {
     });
   };
 
+  const switchNetwork = async () => {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: TARGET_CHAIN_ID }],
+      });
+      setChainId(TARGET_CHAIN_ID);
+      toast.success("Switched to correct network", {
+        duration: 1000,
+        position: "bottom-left",
+      });
+    } catch (err) {
+      console.error("Failed to switch network", err);
+      toast.error("Network switch failed", {
+        description: "Please switch manually in MetaMask.",
+        duration: 1000,
+        position: "bottom-left",
+      });
+    }
+  };
+
   useEffect(() => {
+    if (typeof window.ethereum === "undefined") {
+      toast.error("MetaMask not detected", {
+        description: "Please install MetaMask to use wallet features.",
+        position: "bottom-left",
+      });
+    }
+
     const wasConnected = localStorage.getItem(WALLET_CONNECTED_KEY) === "true";
 
     if (window.ethereum && wasConnected) {
@@ -62,15 +97,20 @@ export const useWallet = () => {
           setIsManuallyConnected(true);
         }
       });
+
+      window.ethereum.request({ method: "eth_chainId" }).then(setChainId);
     }
 
-    // Track account changes
     window.ethereum?.on("accountsChanged", (accounts: string[]) => {
       if (accounts.length > 0) {
         setAddress(accounts[0]);
       } else {
-        disconnect(); // if MetaMask disconnects at source
+        disconnect();
       }
+    });
+
+    window.ethereum?.on("chainChanged", (newChainId: string) => {
+      setChainId(newChainId);
     });
   }, []);
 
@@ -79,5 +119,8 @@ export const useWallet = () => {
     isConnected: !!address && isManuallyConnected,
     connect,
     disconnect,
+    switchNetwork,
+    chainId,
+    networkCorrect: chainId === TARGET_CHAIN_ID,
   };
 };
