@@ -28,8 +28,7 @@ const COLORS = [
   '#077353',
   '#055459',
   '#26294a',
-  '#1a1334',
-  '#f8f9fa' // gentle white shade
+  '#1a1334'
 ];
 
 export const PixelPanel: React.FC<PixelPanelProps> = ({ 
@@ -107,16 +106,24 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
           
           {/* Selected color preview */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-2 px-3 py-1 bg-white rounded">
             <div 
               className="w-8 h-8 rounded border-2 border-gray-300"
               style={{ backgroundColor: selectedColor }}
             />
-            <span className="font-mono text-sm">{selectedColor}</span>
+            <input
+              type="text"
+              value={selectedColor}
+              onChange={e => setSelectedColor(e.target.value)}
+              className="font-mono text-sm border border-gray-300 rounded px-2 py-1 w-24 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              maxLength={7}
+              pattern="^#([A-Fa-f0-9]{6})$"
+              title="Hex color, e.g. #aabbcc"
+            />
           </div>
 
           {/* Color grid */}
-          <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
+          <div className="grid grid-cols-6 gap-2 max-h-50 overflow-y-auto p-3 bg-white rounded">
             {COLORS.map((color) => (
               <button
                 key={color}
