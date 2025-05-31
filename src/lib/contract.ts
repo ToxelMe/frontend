@@ -10,7 +10,7 @@ import { defineChain, webSocket, decodeEventLog } from 'viem';
 import { Abi, ContractEventName } from 'viem';
 import PixelBattleABI from '@/abi/PixelBattleABI.json';
 
-export const CONTRACT_ADDRESS = '0xdf22403a8fdb6FE7C2d0C95A56f7fa343e32c5a5';
+export const CONTRACT_ADDRESS = '0xA2a5092e02780c025F12026F6469f8B57fDF9032';
 
 const abi = PixelBattleABI.abi as Abi;
 const STEP = 500n;
