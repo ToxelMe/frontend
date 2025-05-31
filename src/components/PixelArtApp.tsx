@@ -119,10 +119,14 @@ export const PixelArtApp: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-800">Toxel</h1>
               <p className="text-sm text-gray-600">Draw. Battle. Earn.</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Canvas: {GRID_SIZE}×{GRID_SIZE} pixels</p>
-              <p className="text-xs text-gray-500">Tap a pixel to buy</p>
-            </div>
+            {selectedPixels.length > 0 && (
+              <button
+                className="text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2"
+                onClick={() => setIsPanelOpen(true)}
+              >
+                Buy pixels
+              </button>
+            )}
           </div>
         </div>
       </header>
