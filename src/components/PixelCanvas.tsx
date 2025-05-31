@@ -10,12 +10,12 @@ interface Pixel {
 }
 
 interface PixelCanvasProps {
-  onPixelClick: (pixel: Pixel) => void;
+  onPixelClick: (pixel: Pixel, event: React.MouseEvent) => void;
   pixels: Pixel[][];
-  selectedPixel: Pixel | null;
+  selectedPixels: Pixel[];
 }
 
-export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, selectedPixel }) => {
+export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, selectedPixels }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -52,12 +52,15 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
         // Draw pixel
         ctx.fillStyle = pixel.color;
         ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
-        
-        // Draw border for selected pixel
-        if (selectedPixel && selectedPixel.x === x && selectedPixel.y === y) {
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2 / scale;
-          ctx.strokeRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+
+        if (selectedPixels.length > 0) {
+          selectedPixels.forEach(pixel => {
+            if (pixel.x === x && pixel.y === y) {
+              ctx.strokeStyle = '#000000';
+              ctx.lineWidth = 2 / scale;
+              ctx.strokeRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+            }
+          })
         }
         
         // Draw grid lines (only when zoomed in)
@@ -70,7 +73,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
     }
 
     ctx.restore();
-  }, [pixels, selectedPixel, scale, offset]);
+  }, [pixels, selectedPixels, scale, offset]);
 
   const getPixelFromMouse = useCallback((clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
@@ -94,7 +97,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
     if (e.button === 0) { // Left click
       const pixel = getPixelFromMouse(e.clientX, e.clientY);
       if (pixel) {
-        onPixelClick(pixel);
+        onPixelClick(pixel, e);
       }
     } else if (e.button === 1 || e.button === 2) { // Middle or right click for panning
       e.preventDefault();
@@ -198,7 +201,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-gray-100">
       <canvas
         ref={canvasRef}
-        className="cursor-crosshair"
+        className="cursor-crosshair bg-white"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
