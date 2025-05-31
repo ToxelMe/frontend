@@ -9,6 +9,13 @@ interface PixelPanelProps {
   isOpen: boolean;
 }
 
+// Мок-функция для получения пользователя (можно вынести в отдельный файл)
+function useMockUser() {
+  const [user] = useState<{ address: string } | null>(null); // null = не залогинен
+  // set user = { address: '0x123...' } для "залогинен"
+  return user;
+}
+
 const COLORS = [
   '#022b7a',
   '#710461',
@@ -32,6 +39,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
   isOpen 
 }) => {
   const [selectedColor, setSelectedColor] = useState(pixel?.color || '#FF0000');
+  const user = useMockUser();
 
   if (!pixel || !isOpen) return null;
 
@@ -125,14 +133,22 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
         </div>
 
-        {/* Buy button */}
-        <button
-          onClick={handleBuy}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
-        >
-          <ShoppingCart size={18} />
-          Buy for {pixel.price} FLOW
-        </button>
+        {/* Buy button or connect wallet */}
+        {!user ? (
+          <button
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+          >
+            Connect wallet
+          </button>
+        ) : (
+          <button
+            onClick={handleBuy}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+          >
+            <ShoppingCart size={18} />
+            Buy for {pixel.price} FLOW
+          </button>
+        )}
 
         {/* Info */}
         <p className="text-xs text-gray-500 mt-3 text-center">
