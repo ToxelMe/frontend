@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { ZoomIn, ZoomOut, Move } from 'lucide-react';
+import { ZoomIn, ZoomOut, Move, HelpCircle } from 'lucide-react';
 
 interface Pixel {
   x: number;
@@ -23,6 +23,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [showHelp, setShowHelp] = useState(false);
 
   const GRID_SIZE = 300;
   const PIXEL_SIZE = 8;
@@ -240,6 +241,27 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
         >
           <Move size={20} />
         </button>
+        {/* Help button styled the same way, now with icon */}
+        <div className="relative">
+          <button
+            className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
+            onMouseEnter={() => setShowHelp(true)}
+            onMouseLeave={() => setShowHelp(false)}
+            tabIndex={0}
+            aria-label="Show controls help"
+            type="button"
+          >
+            <HelpCircle size={20} />
+          </button>
+          {showHelp && (
+            <div className="absolute left-12 top-1 z-50 bg-white/95 border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 w-56">
+              <p className="mb-1 font-semibold">Controls:</p>
+              <p>• Left Click — select pixel</p>
+              <p>• Scroll Wheel — zoom</p>
+              <p>• Right/Middle Click — move</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Zoom indicator */}
