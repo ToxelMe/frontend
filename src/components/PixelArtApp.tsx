@@ -110,14 +110,6 @@ export const PixelArtApp: React.FC = () => {
         />
       )}
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 text-xs text-gray-600 max-w-xs">
-        <p className="mb-1"><strong>Controls:</strong></p>
-        <p>• Left Click - select pixel</p>
-        <p>• Scroll Wheel - zoom</p>
-        <p>• Right/Middle Click - move</p>
-      </div>
-
     </div>
   );
 };
