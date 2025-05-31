@@ -65,31 +65,33 @@ export const PixelArtApp: React.FC = () => {
     }
   };
 
-  const handleBuyPixel = (pixel: Pixel, newColor: string) => {
-    console.log('Buying pixel:', pixel, 'New color:', newColor);
+  const handleBuyPixel = (pixels: Pixel[], newColor: string) => {
+    console.log('Buying pixel:', pixels, 'New color:', newColor);
     
     // Update pixel in grid
     setPixels(prev => {
       const newPixels = [...prev];
-      newPixels[pixel.x][pixel.y] = {
-        ...pixel,
-        color: newColor,
-        owner: 'You',
-        price: pixel.price + 5 // Increase price after purchase
-      };
+      pixels.forEach(pixel => {
+        newPixels[pixel.x][pixel.y] = {
+          ...pixel,
+          color: newColor,
+          owner: 'You',
+          price: pixel.price + 5 // Increase price after purchase
+        };
+      });
       return newPixels;
     });
 
     // Update selected pixel
-    setSelectedPixels(prev => prev.map(p => p.x === pixel.x && p.y === pixel.y ? {
+    setSelectedPixels(prev => prev.map(p =>  pixels.some(pixel => pixel.x === p.x && pixel.y === p.y) ? {
       ...p,
       color: newColor,
       owner: 'You',
       price: p.price + 5
     } : p));
 
-    toast.success(`Pixel (${pixel.x}, ${pixel.y}) purchased successfully!`, {
-      description: `New color: ${newColor}. Spent: ${pixel.price} FLOW`
+    toast.success(`Pixel (${pixels[0].x}, ${pixels[0].y}) purchased successfully!`, {
+      description: `New color: ${newColor}. Spent: ${pixels[0].price} FLOW`
     });
   };
 
@@ -142,7 +144,7 @@ export const PixelArtApp: React.FC = () => {
 
       {/* Side Panel */}
       <PixelPanel
-        pixel={selectedPixels[0]}
+        pixels={selectedPixels}
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         onBuyPixel={handleBuyPixel}

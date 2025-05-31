@@ -10,9 +10,9 @@ interface Pixel {
 }
 
 interface PixelPanelProps {
-  pixel: Pixel | null;
+  pixels: Pixel[];
   onClose: () => void;
-  onBuyPixel: (pixel: Pixel, color: string) => void;
+  onBuyPixel: (pixels: Pixel[], color: string) => void;
   isOpen: boolean;
 }
 
@@ -33,20 +33,20 @@ const COLORS = [
 ];
 
 export const PixelPanel: React.FC<PixelPanelProps> = ({ 
-  pixel, 
+  pixels, 
   onClose, 
   onBuyPixel, 
   isOpen 
 }) => {
-  const [selectedColor, setSelectedColor] = useState(pixel?.color || '#FF0000');
+  const [selectedColor, setSelectedColor] = useState('#FF0000');
 
-  if (!pixel || !isOpen) return null;
+  if (!pixels || !isOpen) return null;
 
   const handleBuy = () => {
-    onBuyPixel(pixel, selectedColor);
+    onBuyPixel(pixels, selectedColor);
   };
 
-  const isOwned = pixel.owner !== 'Available';
+  const isOwned = pixels.some(pixel => pixel.owner !== 'Available');
 
   return (
     <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ${
@@ -55,7 +55,9 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
       <div className="p-6 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Toxel ({pixel.x}, {pixel.y})</h2>
+          <h2 className="text-xl font-bold text-gray-800">
+            {pixels.length === 1 ? `Toxel (${pixels[0].x}, ${pixels[0].y})` : 'Multiple pixels'}
+          </h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -69,11 +71,11 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-12 h-12 rounded-lg border-2 border-gray-300"
-              style={{ backgroundColor: pixel.color }}
+              style={{ backgroundColor: pixels[0].color }}
             />
             <div>
               <p className="text-sm text-gray-600">Current color</p>
-              <p className="font-mono text-sm">{pixel.color}</p>
+              <p className="font-mono text-sm">{pixels[0].color}</p>
             </div>
           </div>
         </div>
@@ -85,7 +87,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <span className="text-sm font-medium text-gray-800">Owner</span>
           </div>
           <p className={`text-sm ${isOwned ? 'text-blue-600' : 'text-green-600'}`}>
-            {pixel.owner}
+            {pixels[0].owner}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <DollarSign size={16} className="text-gray-600" />
             <span className="text-sm font-medium text-gray-800">Painting price</span>
           </div>
-          <p className="text-lg font-bold text-green-600">{pixel.price} FLOW</p>
+          <p className="text-lg font-bold text-green-600">{pixels[0].price} FLOW</p>
         </div>
 
         {/* Color picker */}
@@ -138,7 +140,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
         >
           <ShoppingCart size={18} />
-          Buy for {pixel.price} FLOW
+          Buy for {pixels[0].price} FLOW
         </button>
 
         {/* Info */}
