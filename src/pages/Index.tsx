@@ -1,4 +1,3 @@
-
 import { PixelArtApp } from "@/components/PixelArtApp";
 
 const Index = () => {

@@ -3,7 +3,7 @@ import { PixelCanvas } from './PixelCanvas';
 import { PixelPanel } from './PixelPanel';
 import { toast } from 'sonner';
 import { buyPixel } from '@/services/pixelService';
-import { generateMockPixels } from '../mocks/pixelMocks'; // добавлен импорт
+import { generateMockPixels } from '../mocks/pixelMocks';
 
 export interface Pixel {
   x: number;
