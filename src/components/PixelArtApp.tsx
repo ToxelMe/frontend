@@ -56,7 +56,12 @@ export const PixelArtApp: React.FC = () => {
     console.log('Pixel clicked:', pixel);
     console.log('Shift key pressed:', event.shiftKey);
     if (event.shiftKey) {
-      setSelectedPixels(prev => [...prev, pixel]);
+      setSelectedPixels(prev => {
+        if (!prev.some(p => p.x === pixel.x && p.y === pixel.y)) {
+          return [...prev, pixel];
+        }
+        return prev;
+      });
       console.log('Selected multiple pixels: ', selectedPixels)
     } else {
       setSelectedPixels([pixel]);
