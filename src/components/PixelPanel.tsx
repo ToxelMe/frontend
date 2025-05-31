@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Palette, User, DollarSign, ShoppingCart } from 'lucide-react';
 import { Pixel } from './PixelArtApp';
 import { useWallet } from '@/hooks/useWallet';
@@ -24,6 +24,14 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
   wallet
 }) => {
   const [selectedColor, setSelectedColor] = useState('#FF0000');
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showColorPicker && colorInputRef.current) {
+      colorInputRef.current.click();
+    }
+  }, [showColorPicker]);
 
   if (!pixels || !isOpen) return null;
 
@@ -94,11 +102,31 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <span className="text-sm font-medium text-gray-800">Color selection</span>
           </div>
           
-          <div className="flex items-center gap-3 mb-4">
-            <div 
-              className="w-8 h-8 rounded border-2 border-gray-300"
-              style={{ backgroundColor: selectedColor }}
-            />
+          <div className="flex items-center gap-3 mb-4 relative">
+            {/* Квадратик выбранного цвета с открытием color picker */}
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                className="w-8 h-8 rounded border-2 border-gray-300 focus:outline-none"
+                style={{ backgroundColor: selectedColor }}
+                onClick={() => setShowColorPicker(v => !v)}
+                title="Pick custom color"
+              />
+              {showColorPicker && (
+                <input
+                  ref={colorInputRef}
+                  type="color"
+                  value={selectedColor}
+                  onChange={e => {
+                    setSelectedColor(e.target.value);
+                  }}
+                  onBlur={() => setShowColorPicker(false)}
+                  className="absolute left-0 top-0 z-50 w-8 h-8 border-none p-0 bg-transparent cursor-pointer"
+                  style={{ minWidth: 32, minHeight: 32 }}
+                  autoFocus
+                />
+              )}
+            </div>
             <input
               type="text"
               value={selectedColor}
@@ -110,6 +138,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             />
           </div>
 
+          {/* Палитра цветов снизу (остается как была) */}
           <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
             {COLORS.map((color) => (
               <button
