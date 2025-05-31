@@ -120,20 +120,21 @@ export const PixelArtApp: React.FC = () => {
                   >
                     Connected: {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
                   </button>
-                  {selectedPixels.length > 0 && (
-                    <button
-                      className="text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2"
-                      onClick={() => setIsPanelOpen(true)}
-                    >
-                      Buy pixels
-                    </button>
-                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </header>
+
+      {selectedPixels.length > 0 && (
+        <button
+          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg transition-all"
+          onClick={() => setIsPanelOpen(true)}
+        >
+          Buy pixels
+        </button>
+      )}
 
       {/* Canvas */}
       <div className="pt-20 h-full">
