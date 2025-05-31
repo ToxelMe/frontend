@@ -57,6 +57,7 @@ export const PixelArtApp: React.FC = () => {
     console.log('Shift key pressed:', event.shiftKey);
     if (event.shiftKey) {
       setSelectedPixels(prev => [...prev, pixel]);
+      console.log('Selected multiple pixels: ', selectedPixels)
     } else {
       setSelectedPixels([pixel]);
       console.log('Selected single pixels: ', selectedPixels)
@@ -130,7 +131,7 @@ export const PixelArtApp: React.FC = () => {
       <div className="pt-20 h-full">
         <PixelCanvas
           pixels={pixels}
-          selectedPixel={selectedPixels[0]}
+          selectedPixels={selectedPixels}
           onPixelClick={handlePixelClick}
         />
       </div>
