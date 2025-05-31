@@ -13,7 +13,7 @@ interface Pixel {
 
 export const PixelArtApp: React.FC = () => {
   const [pixels, setPixels] = useState<Pixel[][]>([]);
-  const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
+  const [selectedPixels, setSelectedPixels] = useState<Pixel[]>([]);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const GRID_SIZE = 100;
@@ -52,10 +52,16 @@ export const PixelArtApp: React.FC = () => {
     setPixels(initialPixels);
   }, []);
 
-  const handlePixelClick = (pixel: Pixel) => {
+  const handlePixelClick = (pixel: Pixel, event: React.MouseEvent) => {
     console.log('Pixel clicked:', pixel);
-    setSelectedPixel(pixel);
-    setIsPanelOpen(true);
+    console.log('Shift key pressed:', event.shiftKey);
+    if (event.shiftKey) {
+      setSelectedPixels(prev => [...prev, pixel]);
+    } else {
+      setSelectedPixels([pixel]);
+      console.log('Selected single pixels: ', selectedPixels)
+      setIsPanelOpen(true);
+    }
   };
 
   const handleBuyPixel = (pixel: Pixel, newColor: string) => {
@@ -74,12 +80,12 @@ export const PixelArtApp: React.FC = () => {
     });
 
     // Update selected pixel
-    setSelectedPixel(prev => prev ? {
-      ...prev,
+    setSelectedPixels(prev => prev.map(p => p.x === pixel.x && p.y === pixel.y ? {
+      ...p,
       color: newColor,
       owner: 'You',
-      price: prev.price + 5
-    } : null);
+      price: p.price + 5
+    } : p));
 
     toast.success(`Pixel (${pixel.x}, ${pixel.y}) purchased successfully!`, {
       description: `New color: ${newColor}. Spent: ${pixel.price} FLOW`
@@ -88,7 +94,7 @@ export const PixelArtApp: React.FC = () => {
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
-    setSelectedPixel(null);
+    setSelectedPixels([]);
   };
 
   if (pixels.length === 0) {
@@ -124,14 +130,14 @@ export const PixelArtApp: React.FC = () => {
       <div className="pt-20 h-full">
         <PixelCanvas
           pixels={pixels}
-          selectedPixel={selectedPixel}
+          selectedPixel={selectedPixels[0]}
           onPixelClick={handlePixelClick}
         />
       </div>
 
       {/* Side Panel */}
       <PixelPanel
-        pixel={selectedPixel}
+        pixel={selectedPixels[0]}
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         onBuyPixel={handleBuyPixel}

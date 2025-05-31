@@ -10,7 +10,7 @@ interface Pixel {
 }
 
 interface PixelCanvasProps {
-  onPixelClick: (pixel: Pixel) => void;
+  onPixelClick: (pixel: Pixel, event: React.MouseEvent) => void;
   pixels: Pixel[][];
   selectedPixel: Pixel | null;
 }
@@ -94,7 +94,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
     if (e.button === 0) { // Left click
       const pixel = getPixelFromMouse(e.clientX, e.clientY);
       if (pixel) {
-        onPixelClick(pixel);
+        onPixelClick(pixel, e);
       }
     } else if (e.button === 1 || e.button === 2) { // Middle or right click for panning
       e.preventDefault();
