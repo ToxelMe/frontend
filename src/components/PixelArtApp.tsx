@@ -4,6 +4,7 @@ import { PixelPanel } from './PixelPanel';
 import { toast } from 'sonner';
 import { buyPixel } from '@/services/pixelService';
 import { generateMockPixels } from '../mocks/pixelMocks';
+import { useWallet } from '@/hooks/useWallet';
 
 export interface Pixel {
   x: number;
@@ -13,27 +14,14 @@ export interface Pixel {
   price: number;
 }
 
-// Мок-функция для получения пользователя
-function useMockUser() {
-  // null - не залогинен, объект - залогинен
-  const [user, setUser] = useState<{ address: string } | null>(null);
-  // имитируем асинхронную загрузку
-  useEffect(() => {
-    // setUser({ address: '0x123...' }); // раскомментируй чтобы "залогинить"
-    setUser(null); // оставить null чтобы "не залогинен"
-  }, []);
-  return user;
-}
-
 export const PixelArtApp: React.FC = () => {
   const [pixels, setPixels] = useState<Pixel[][]>([]);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const GRID_SIZE = 300;
-  const user = useMockUser();
+  const wallet = useWallet(); // 👉 подключаем хук
 
-  // Initialize pixels grid
   useEffect(() => {
     setPixels(generateMockPixels(GRID_SIZE));
   }, []);
@@ -45,9 +33,15 @@ export const PixelArtApp: React.FC = () => {
   };
 
   const handleBuyPixel = async (pixel: Pixel, newColor: string) => {
-    // Use the service for buying logic
+    if (!wallet.isConnected || !wallet.address) {
+      toast.error("Wallet not connected", {
+        description: "Please connect your wallet before buying a pixel.",
+      });
+      return;
+    }
+
     try {
-      const updatedPixel = await buyPixel(pixel, newColor, "You");
+      const updatedPixel = await buyPixel(pixel, newColor, wallet.address); // передаём реальный адрес
       setPixels(prev => {
         const newPixels = [...prev];
         newPixels[pixel.x][pixel.y] = updatedPixel;
@@ -91,17 +85,24 @@ export const PixelArtApp: React.FC = () => {
               <p className="text-sm text-gray-600">Draw. Battle. Earn.</p>
             </div>
             <div className="text-right">
-              {!user ? (
+              {!wallet.isConnected ? (
                 <button
+                  onClick={wallet.connect}
                   className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow transition"
                 >
                   Connect wallet
                 </button>
               ) : (
-                <>
-                  <p className="text-sm text-gray-600">Canvas: {GRID_SIZE}×{GRID_SIZE} pixels</p>
+                <div className="flex flex-col items-end space-y-1">
+                  <button
+                    onClick={wallet.disconnect}
+                    className="text-sm text-gray-600 hover:text-red-600 transition"
+                    title="Click to disconnect"
+                  >
+                    Connected: {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+                  </button>
                   <p className="text-xs text-gray-500">Tap a pixel to buy</p>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -123,6 +124,7 @@ export const PixelArtApp: React.FC = () => {
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         onBuyPixel={handleBuyPixel}
+        wallet={wallet}
       />
 
       {/* Overlay when panel is open */}
@@ -132,7 +134,6 @@ export const PixelArtApp: React.FC = () => {
           onClick={handleClosePanel}
         />
       )}
-
     </div>
   );
 };
