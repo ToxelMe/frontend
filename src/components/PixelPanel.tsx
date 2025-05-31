@@ -7,38 +7,22 @@ interface PixelPanelProps {
   onClose: () => void;
   onBuyPixel: (pixel: Pixel, color: string) => void;
   isOpen: boolean;
-}
-
-// Мок-функция для получения пользователя (можно вынести в отдельный файл)
-function useMockUser() {
-  const [user] = useState<{ address: string } | null>(null); // null = не залогинен
-  // set user = { address: '0x123...' } для "залогинен"
-  return user;
+  wallet: ReturnType<typeof useWallet>;
 }
 
 const COLORS = [
-  '#022b7a',
-  '#710461',
-  '#a02c5d',
-  '#ec0e47',
-  '#ee6c3b',
-  '#fcbf54',
-  '#abd96d',
-  '#14c285',
-  '#077353',
-  '#055459',
-  '#26294a',
-  '#1a1334'
+  '#022b7a', '#710461', '#a02c5d', '#ec0e47', '#ee6c3b', '#fcbf54',
+  '#abd96d', '#14c285', '#077353', '#055459', '#26294a', '#1a1334', '#f8f9fa'
 ];
 
 export const PixelPanel: React.FC<PixelPanelProps> = ({ 
   pixel, 
   onClose, 
   onBuyPixel, 
-  isOpen 
+  isOpen, 
+  wallet
 }) => {
   const [selectedColor, setSelectedColor] = useState(pixel?.color || '#FF0000');
-  const user = useMockUser();
 
   if (!pixel || !isOpen) return null;
 
@@ -64,7 +48,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </button>
         </div>
 
-        {/* Current pixel display */}
+        {/* Pixel Info */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div 
@@ -78,7 +62,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
         </div>
 
-        {/* Owner info */}
+        {/* Owner */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <User size={16} className="text-gray-600" />
@@ -98,15 +82,14 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           <p className="text-lg font-bold text-green-600">{pixel.price} FLOW</p>
         </div>
 
-        {/* Color picker */}
+        {/* Color Picker */}
         <div className="mb-6 flex-1">
           <div className="flex items-center gap-2 mb-3">
             <Palette size={16} className="text-gray-600" />
             <span className="text-sm font-medium text-gray-800">Color selection</span>
           </div>
           
-          {/* Selected color preview */}
-          <div className="flex items-center gap-3 mb-2 px-3 py-1 bg-white rounded">
+          <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-8 h-8 rounded border-2 border-gray-300"
               style={{ backgroundColor: selectedColor }}
@@ -122,8 +105,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             />
           </div>
 
-          {/* Color grid */}
-          <div className="grid grid-cols-6 gap-2 max-h-50 overflow-y-auto p-3 bg-white rounded">
+          <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto">
             {COLORS.map((color) => (
               <button
                 key={color}
@@ -140,9 +122,10 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </div>
         </div>
 
-        {/* Buy button or connect wallet */}
-        {!user ? (
+        {/* Buy or Connect */}
+        {!wallet.isConnected ? (
           <button
+            onClick={wallet.connect}
             className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
           >
             Connect wallet
@@ -157,7 +140,6 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           </button>
         )}
 
-        {/* Info */}
         <p className="text-xs text-gray-500 mt-3 text-center">
           When purchasing, the pixel will be recolored to the selected color
         </p>
