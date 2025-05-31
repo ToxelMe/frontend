@@ -25,7 +25,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const [showHelp, setShowHelp] = useState(false);
 
-  const GRID_SIZE = 300;
+  const GRID_SIZE = 100;
   const PIXEL_SIZE = 8;
 
   const drawCanvas = useCallback(() => {
