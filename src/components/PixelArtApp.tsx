@@ -100,8 +100,8 @@ export const PixelArtApp: React.FC = () => {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Toxel</h1>
-              <p className="text-sm text-gray-600">Draw. Battle. Earn.</p>
+              <img src="/public/logo.png" alt="Toxel Logo" className="h-12 w-auto" />
+              <p className="text-sm text-gray-600 ml-3">Draw. Battle. Earn.</p>
             </div>
             <div className="text-right flex items-center gap-4">
               {!wallet.isConnected ? (
