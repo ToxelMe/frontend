@@ -3,7 +3,7 @@ import { X, Palette, User, DollarSign, ShoppingCart } from 'lucide-react';
 import { Pixel } from './PixelArtApp';
 import { useWallet } from '@/hooks/useWallet';
 import { toast } from 'sonner';
-import { claimPixel } from '@/lib/contract';
+import { claimPixel, getPixelPriceAt } from '@/lib/contract';
 
 interface PixelPanelProps {
   pixels: Pixel[];
@@ -17,6 +17,9 @@ const COLORS = [
   '#abd96d', '#14c285', '#077353', '#055459', '#26294a', '#1a1334', '#f8f9fa'
 ];
 
+// Функция для форматирования wei в FLOW
+const formatFlow = (wei: bigint): string => (Number(wei) / 1e18).toFixed(6);
+
 export const PixelPanel: React.FC<PixelPanelProps> = ({
   pixels,
   onClose,
@@ -27,12 +30,34 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [localPixels, setLocalPixels] = useState<Pixel[]>([]);
 
   useEffect(() => {
     if (showColorPicker && colorInputRef.current) {
       colorInputRef.current.click();
     }
   }, [showColorPicker]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const updated = await Promise.all(
+        pixels.map(async (pixel) => {
+          try {
+            const price = await getPixelPriceAt(pixel.x, pixel.y);
+            return { ...pixel, price };
+          } catch (e) {
+            console.error(`Failed to get price for (${pixel.x}, ${pixel.y})`, e);
+            return { ...pixel, price: BigInt(0) };
+          }
+        })
+      );
+      setLocalPixels(updated);
+    };
+
+    if (isOpen && pixels.length > 0) {
+      fetchPrices();
+    }
+  }, [isOpen, pixels]);
 
   const handleBuy = async () => {
     if (!wallet.address || !wallet.networkCorrect) {
@@ -42,12 +67,11 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
 
     try {
       setLoading(true);
-      for (const pixel of pixels) {
+      for (const pixel of localPixels) {
         await claimPixel({
           x: pixel.x,
           y: pixel.y,
-          color: selectedColor,
-          value: pixel.price
+          color: selectedColor
         });
       }
       toast.success("Pixels claimed!");
@@ -62,11 +86,16 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
     }
   };
 
-  if (!pixels || !isOpen) return null;
+  if (!isOpen || localPixels.length === 0) return null;
 
-  const isOwned = pixels.some(pixel => pixel.owner !== 'Available');
-  const isMultipleOwners = new Set(pixels.map(pixel => pixel.owner)).size > 1;
-  const totalPrice = pixels.reduce((total, pixel) => total + pixel.price, 0);
+  const isOwned = localPixels.some(pixel => pixel.owner !== 'Available');
+  const isMultipleOwners = new Set(localPixels.map(p => p.owner)).size > 1;
+
+  // 💰 Правильное BigInt сложение
+  const totalPrice = localPixels.reduce(
+    (total, pixel) => total + (pixel.price || BigInt(0)),
+    BigInt(0)
+  );
 
   return (
     <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ${
@@ -75,7 +104,9 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
       <div className="p-6 h-full flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-800">
-            {pixels.length === 1 ? `Toxel (${pixels[0].x}, ${pixels[0].y})` : 'Multiple pixels'}
+            {localPixels.length === 1
+              ? `Toxel (${localPixels[0].x}, ${localPixels[0].y})`
+              : 'Multiple pixels'}
           </h2>
           <button
             onClick={onClose}
@@ -88,11 +119,11 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
         <div className="mb-6 flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-lg border-2 border-gray-300"
-            style={{ backgroundColor: pixels[0].color }}
+            style={{ backgroundColor: localPixels[0].color }}
           />
           <div>
             <p className="text-sm text-gray-600">Current color</p>
-            <p className="font-mono text-sm">{pixels[0].color}</p>
+            <p className="font-mono text-sm">{localPixels[0].color}</p>
           </div>
         </div>
 
@@ -102,7 +133,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <span className="text-sm font-medium text-gray-800">Owner</span>
           </div>
           <p className={`text-sm ${isOwned ? 'text-blue-600' : 'text-green-600'}`}>
-            {isMultipleOwners ? 'Multiple owners' : pixels[0].owner}
+            {isMultipleOwners ? 'Multiple owners' : localPixels[0].owner}
           </p>
         </div>
 
@@ -111,7 +142,9 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <DollarSign size={16} className="text-gray-600" />
             <span className="text-sm font-medium text-gray-800">Price</span>
           </div>
-          <p className="text-lg font-bold text-green-600">{totalPrice} FLOW</p>
+          <p className="text-lg font-bold text-green-600">
+            {formatFlow(totalPrice)} FLOW
+          </p>
         </div>
 
         <div className="mb-6 flex-1">
@@ -190,7 +223,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium disabled:opacity-50"
           >
             <ShoppingCart size={18} />
-            {loading ? 'Processing...' : `Buy for ${totalPrice} FLOW`}
+            {loading ? 'Processing...' : `Buy for ${formatFlow(totalPrice)} FLOW`}
           </button>
         )}
 

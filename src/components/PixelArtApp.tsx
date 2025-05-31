@@ -32,7 +32,7 @@ export const PixelArtApp: React.FC = () => {
         y,
         color: '#ffffff',
         owner: '',
-        price: 1,
+        price: 0.0,
       }))
     );
     setPixels(initialPixels);

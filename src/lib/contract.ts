@@ -10,7 +10,7 @@ import { defineChain, webSocket, decodeEventLog } from 'viem';
 import { Abi, ContractEventName } from 'viem';
 import PixelBattleABI from '@/abi/PixelBattleABI.json';
 
-export const CONTRACT_ADDRESS = '0x9450c70108f13cC1aDfebd2a95BafA95212F48dE';
+export const CONTRACT_ADDRESS = '0xdf22403a8fdb6FE7C2d0C95A56f7fa343e32c5a5';
 
 const abi = PixelBattleABI.abi as Abi;
 const STEP = 500n;
@@ -131,6 +131,17 @@ export async function loadPastPixelChanges() {
   return logs;
 }
 
+export async function getPixelPriceAt(x: number, y: number): Promise<bigint> {
+  const contract = getContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: PixelBattleABI.abi,
+    client: client,
+  });
+
+  const price = await contract.read.getPixelPrice([BigInt(x), BigInt(y)]);
+  return price;
+}
+
 export async function claimPixel({
   x,
   y,
@@ -151,26 +162,24 @@ export async function claimPixel({
 
   const [account] = await walletClient.getAddresses();
 
-  // Подключаем контракт
   const contract = getContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: PixelBattleABI.abi,
     client: walletClient,
   });
 
-  // Узнаём актуальную цену пикселя
-  const price = await contract.read.getPixelPrice([BigInt(x), BigInt(y)]);
+  const price = await getPixelPriceAt(x, y); // Используем функцию получения цены
 
   const hexColor = color.startsWith('#') ? color.slice(1) : color;
   const bytes3Color = `0x${hexColor.slice(0, 6)}` as `0x${string}`;
-  // Отправляем транзакцию claimPixel с нужной ценой
+
   const txHash = await walletClient.writeContract({
     address: CONTRACT_ADDRESS,
     abi: PixelBattleABI.abi,
     functionName: 'claimPixel',
     args: [BigInt(x), BigInt(y), bytes3Color],
     account,
-    value: price, // передаём актуальную стоимость из контракта
+    value: price,
   });
 
   return txHash;
