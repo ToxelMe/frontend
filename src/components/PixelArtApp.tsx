@@ -16,7 +16,7 @@ export interface Pixel {
 
 export const PixelArtApp: React.FC = () => {
   const [pixels, setPixels] = useState<Pixel[][]>([]);
-  const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
+  const [selectedPixels, setSelectedPixels] = useState<Pixel[]>([]);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const GRID_SIZE = 300;
@@ -26,13 +26,25 @@ export const PixelArtApp: React.FC = () => {
     setPixels(generateMockPixels(GRID_SIZE));
   }, []);
 
-  const handlePixelClick = (pixel: Pixel) => {
+  const handlePixelClick = (pixel: Pixel, event: React.MouseEvent) => {
     console.log('Pixel clicked:', pixel);
-    setSelectedPixel(pixel);
-    setIsPanelOpen(true);
+    console.log('Shift key pressed:', event.shiftKey);
+    if (event.shiftKey) {
+      setSelectedPixels(prev => {
+        if (!prev.some(p => p.x === pixel.x && p.y === pixel.y)) {
+          return [...prev, pixel];
+        }
+        return prev;
+      });
+      console.log('Selected multiple pixels: ', selectedPixels)
+    } else {
+      setSelectedPixels([pixel]);
+      console.log('Selected single pixels: ', selectedPixels)
+      setIsPanelOpen(true);
+    }
   };
 
-  const handleBuyPixel = async (pixel: Pixel, newColor: string) => {
+  const handleBuyPixel = async (pixels: Pixel[], newColor: string) => {
     if (!wallet.isConnected || !wallet.address) {
       toast.error("Wallet not connected", {
         description: "Please connect your wallet before buying a pixel.",
@@ -41,15 +53,22 @@ export const PixelArtApp: React.FC = () => {
     }
 
     try {
-      const updatedPixel = await buyPixel(pixel, newColor, wallet.address); // передаём реальный адрес
+      const updatedPixels = await buyPixel(pixels, newColor, wallet.address); // передаём реальный адрес
       setPixels(prev => {
-        const newPixels = [...prev];
-        newPixels[pixel.x][pixel.y] = updatedPixel;
-        return newPixels;
-      });
-      setSelectedPixel(updatedPixel);
-      toast.success(`Pixel (${pixel.x}, ${pixel.y}) purchased successfully!`, {
-        description: `New color: ${newColor}. Spent: ${pixel.price} FLOW`,
+          const newPixels = [...prev];
+          updatedPixels.forEach(pixel => {
+            newPixels[pixel.x][pixel.y] = {
+              ...pixel,
+              color: newColor,
+              owner: 'You',
+              price: pixel.price + 5 // Increase price after purchase
+            };
+          });
+          return newPixels;
+        });
+      setSelectedPixels(updatedPixels);
+      toast.success(pixels.length > 1 ? `Pixels purchased successfully!` : `Pixel (${pixels[0].x}, ${pixels[0].y}) purchased successfully!`, {
+        description: `New color: ${newColor}. Spent: ${pixels.reduce((total, pixel) => total + pixel.price, 0)} FLOW`,
         duration: 1500,
         position: 'bottom-left'
       });
@@ -60,7 +79,7 @@ export const PixelArtApp: React.FC = () => {
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
-    setSelectedPixel(null);
+    setSelectedPixels([]);
   };
 
   if (pixels.length === 0) {
@@ -101,7 +120,14 @@ export const PixelArtApp: React.FC = () => {
                   >
                     Connected: {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
                   </button>
-                  <p className="text-xs text-gray-500">Tap a pixel to buy</p>
+                  {selectedPixels.length > 0 && (
+                    <button
+                      className="text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2"
+                      onClick={() => setIsPanelOpen(true)}
+                    >
+                      Buy pixels
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -113,14 +139,14 @@ export const PixelArtApp: React.FC = () => {
       <div className="pt-20 h-full">
         <PixelCanvas
           pixels={pixels}
-          selectedPixel={selectedPixel}
+          selectedPixels={selectedPixels}
           onPixelClick={handlePixelClick}
         />
       </div>
 
       {/* Side Panel */}
       <PixelPanel
-        pixel={selectedPixel}
+        pixels={selectedPixels}
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         onBuyPixel={handleBuyPixel}
