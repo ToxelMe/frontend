@@ -48,6 +48,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
 
   const isOwned = pixels.some(pixel => pixel.owner !== 'Available');
   const isMultipleOwners = new Set(pixels.map(pixel => pixel.owner)).size > 1;
+  const totalPrice = pixels.reduce((total, pixel) => total + pixel.price, 0);
 
   return (
     <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ${
@@ -98,7 +99,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
             <DollarSign size={16} className="text-gray-600" />
             <span className="text-sm font-medium text-gray-800">Painting price</span>
           </div>
-          <p className="text-lg font-bold text-green-600">{pixels[0].price} FLOW</p>
+          <p className="text-lg font-bold text-green-600">{totalPrice} FLOW</p>
         </div>
 
         {/* Color picker */}
@@ -141,7 +142,7 @@ export const PixelPanel: React.FC<PixelPanelProps> = ({
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
         >
           <ShoppingCart size={18} />
-          Buy for {pixels[0].price} FLOW
+          Buy for {totalPrice} FLOW
         </button>
 
         {/* Info */}
