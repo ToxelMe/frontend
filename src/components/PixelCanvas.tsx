@@ -222,7 +222,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
       />
       
       {/* Controls */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2">
+      <div className="absolute mt-4 top-4 left-4 flex flex-col gap-2">
         <button
           onClick={handleZoomIn}
           className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
@@ -245,7 +245,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
           <Move size={20} />
         </button>
         {/* Help button styled the same way, now with icon */}
-        <div className="relative">
+        <div className="relative" >
           <button
             className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
             onMouseEnter={() => setShowHelp(true)}
@@ -262,6 +262,7 @@ export const PixelCanvas: React.FC<PixelCanvasProps> = ({ onPixelClick, pixels, 
               <p>• Left Click — select pixel</p>
               <p>• Scroll Wheel — zoom</p>
               <p>• Right/Middle Click — move</p>
+              <p>• Hold Shift - multiple select</p>
             </div>
           )}
         </div>
