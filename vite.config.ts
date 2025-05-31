@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
+// ✅ Добавлено
+import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -11,12 +13,21 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      buffer: "buffer",              // 👈 обязательно
+      process: "process/browser",    // 👈 обязательно
+    },
+  },
+  optimizeDeps: {
+    include: ["buffer", "process"],
+  },
+  build: {
+    rollupOptions: {
+      plugins: [rollupNodePolyFill()],
     },
   },
 }));
