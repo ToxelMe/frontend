@@ -168,7 +168,11 @@ export async function claimPixel({
     client: walletClient,
   });
 
-  const price = await getPixelPriceAt(x, y); // Используем функцию получения цены
+  const owner: string = await contract.read.getPixelOwner([BigInt(x), BigInt(y)]);
+
+  const price = owner.toLowerCase() === account.toLowerCase()
+    ? 0n
+    : await getPixelPriceAt(x, y);
 
   const hexColor = color.startsWith('#') ? color.slice(1) : color;
   const bytes3Color = `0x${hexColor.slice(0, 6)}` as `0x${string}`;
