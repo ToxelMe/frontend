@@ -13,12 +13,25 @@ export interface Pixel {
   price: number;
 }
 
+// Мок-функция для получения пользователя
+function useMockUser() {
+  // null - не залогинен, объект - залогинен
+  const [user, setUser] = useState<{ address: string } | null>(null);
+  // имитируем асинхронную загрузку
+  useEffect(() => {
+    // setUser({ address: '0x123...' }); // раскомментируй чтобы "залогинить"
+    setUser(null); // оставить null чтобы "не залогинен"
+  }, []);
+  return user;
+}
+
 export const PixelArtApp: React.FC = () => {
   const [pixels, setPixels] = useState<Pixel[][]>([]);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const GRID_SIZE = 300;
+  const user = useMockUser();
 
   // Initialize pixels grid
   useEffect(() => {
@@ -78,8 +91,18 @@ export const PixelArtApp: React.FC = () => {
               <p className="text-sm text-gray-600">Draw. Battle. Earn.</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Canvas: {GRID_SIZE}×{GRID_SIZE} pixels</p>
-              <p className="text-xs text-gray-500">Tap a pixel to buy</p>
+              {!user ? (
+                <button
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow transition"
+                >
+                  Connect wallet
+                </button>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600">Canvas: {GRID_SIZE}×{GRID_SIZE} pixels</p>
+                  <p className="text-xs text-gray-500">Tap a pixel to buy</p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -109,14 +132,6 @@ export const PixelArtApp: React.FC = () => {
           onClick={handleClosePanel}
         />
       )}
-
-      {/* Instructions */}
-      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 text-xs text-gray-600 max-w-xs">
-        <p className="mb-1"><strong>Controls:</strong></p>
-        <p>• Left Click - select pixel</p>
-        <p>• Scroll Wheel - zoom</p>
-        <p>• Right/Middle Click - move</p>
-      </div>
 
     </div>
   );
